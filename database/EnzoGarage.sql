@@ -36,17 +36,15 @@ CREATE TABLE IF NOT EXISTS `advertisement`
     `description` text COLLATE utf8_unicode_ci        NOT NULL,
     `date`        date                                NOT NULL,
     `id_brand`    int(10) UNSIGNED                    NOT NULL,
-    `id_model`    int(10) UNSIGNED                    NOT NULL,
     `id_fuel`     int(10) UNSIGNED                    NOT NULL,
     `mileage`     mediumint(9)                        NOT NULL,
     `year`        year(4)                             NOT NULL,
     `id_garage`   int(10) UNSIGNED                    NOT NULL,
     `id_img`      int(10) UNSIGNED                    NOT NULL,
     PRIMARY KEY (`ref`),
-    KEY `id_brand` (`id_brand`, `id_model`, `id_fuel`, `id_garage`),
+    KEY `id_brand` (`id_brand`, `id_fuel`, `id_garage`),
     KEY `id_garage` (`id_garage`),
     KEY `id_fuel` (`id_fuel`),
-    KEY `id_model` (`id_model`),
     KEY `id_img` (`id_img`)
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8
@@ -61,9 +59,11 @@ CREATE TABLE IF NOT EXISTS `advertisement`
 DROP TABLE IF EXISTS `brand`;
 CREATE TABLE IF NOT EXISTS `brand`
 (
-    `id_b`   int(10) UNSIGNED                    NOT NULL AUTO_INCREMENT,
-    `name_b` varchar(30) COLLATE utf8_unicode_ci NOT NULL,
-    PRIMARY KEY (`id_b`)
+    `id_b`     int(10) UNSIGNED                    NOT NULL AUTO_INCREMENT,
+    `name_b`   varchar(30) COLLATE utf8_unicode_ci NOT NULL,
+    `id_model` int(10) UNSIGNED,
+    PRIMARY KEY (`id_b`),
+    KEY `Model_FK` (`id_model`)
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8
   COLLATE = utf8_unicode_ci;
@@ -71,16 +71,19 @@ CREATE TABLE IF NOT EXISTS `brand`
 -- --------------------------------------------------------
 
 --
--- Structure de la table `city`
+-- Structure de la table `address`
 --
 
-DROP TABLE IF EXISTS `city`;
-CREATE TABLE IF NOT EXISTS `city`
+DROP TABLE IF EXISTS `address`;
+CREATE TABLE IF NOT EXISTS `address`
 (
-    `id_city`   int(10) UNSIGNED                     NOT NULL AUTO_INCREMENT,
-    `name_city` varchar(250) COLLATE utf8_unicode_ci NOT NULL,
-    `region`    varchar(250) COLLATE utf8_unicode_ci NOT NULL,
-    PRIMARY KEY (`id_city`)
+    `id_address`    int(10) UNSIGNED                     NOT NULL AUTO_INCREMENT,
+    `city_a`        varchar(250) COLLATE utf8_unicode_ci NOT NULL,
+    `region_a`      varchar(250) COLLATE utf8_unicode_ci NOT NULL,
+    `street_name_a` varchar(50) COLLATE utf8_unicode_ci  NOT NULL,
+    `street_num_a`  varchar(50) COLLATE utf8_unicode_ci  NOT NULL,
+    `postal_code_a` varchar(50) COLLATE utf8_unicode_ci  NOT NULL,
+    PRIMARY KEY (`id_address`)
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8
   COLLATE = utf8_unicode_ci;
@@ -110,18 +113,13 @@ CREATE TABLE IF NOT EXISTS `fueltype`
 DROP TABLE IF EXISTS `garage`;
 CREATE TABLE IF NOT EXISTS `garage`
 (
-    `id_g`          int(10) UNSIGNED                     NOT NULL AUTO_INCREMENT,
-    `name_g`        varchar(50) COLLATE utf8_unicode_ci  NOT NULL,
-    `street_name_g` varchar(50) COLLATE utf8_unicode_ci  NULL,
-    `street_num_g`  varchar(50) COLLATE utf8_unicode_ci  NULL,
-    `postal_code_g` varchar(50) COLLATE utf8_unicode_ci  NOT NULL,
-    `email_g`       varchar(320) COLLATE utf8_unicode_ci NOT NULL,
-    `tel_g`         int(10) UNSIGNED ZEROFILL            NOT NULL,
-    `id_pro`        int(10) UNSIGNED                     NOT NULL,
-    `id_city`       int(10) UNSIGNED                     NOT NULL,
+    `id_g`       int(10) UNSIGNED                     NOT NULL AUTO_INCREMENT,
+    `name_g`     varchar(50) COLLATE utf8_unicode_ci  NOT NULL,
+    `email_g`    varchar(320) COLLATE utf8_unicode_ci NOT NULL,
+    `tel_g`      int(10) UNSIGNED ZEROFILL            NOT NULL,
+    `id_address` int(10) UNSIGNED                     NOT NULL,
     PRIMARY KEY (`id_g`),
-    KEY `Garage_Pro_FK` (`id_pro`),
-    KEY `Garage_CITY0_FK` (`id_city`)
+    KEY `Garage_address0_FK` (`id_address`)
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8
   COLLATE = utf8_unicode_ci;
@@ -137,10 +135,8 @@ CREATE TABLE IF NOT EXISTS `model`
 (
     `id_model`   int(10) UNSIGNED                    NOT NULL AUTO_INCREMENT,
     `name_model` varchar(50) COLLATE utf8_unicode_ci NOT NULL,
-    `id_b`       int(10) UNSIGNED                    NOT NULL,
     `id_img`     int(10) UNSIGNED                    NOT NULL,
-    PRIMARY KEY (`id_model`),
-    KEY `Model_Brand_FK` (`id_b`)
+    PRIMARY KEY (`id_model`)
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8
   COLLATE = utf8_unicode_ci;
@@ -157,11 +153,9 @@ CREATE TABLE IF NOT EXISTS `images`
     `id_img`   int(10) UNSIGNED                     NOT NULL AUTO_INCREMENT,
     `url_img`  varchar(250) COLLATE utf8_unicode_ci NOT NULL,
     `alt_img`  varchar(200) COLLATE utf8_unicode_ci NOT NULL,
-    `ref_ad`   int(10) UNSIGNED                     NOT NULL,
     `id_pro`   int(10) UNSIGNED                     NOT NULL,
     `id_model` int(10) UNSIGNED                     NOT NULL,
     PRIMARY KEY (`id_img`),
-    KEY `Image_AD_FK` (`ref_ad`),
     KEY `Image_PRO_FK` (`id_pro`),
     KEY `Image_MOD_FK` (`id_model`)
 ) ENGINE = InnoDB
@@ -177,19 +171,20 @@ CREATE TABLE IF NOT EXISTS `images`
 DROP TABLE IF EXISTS `professional`;
 CREATE TABLE IF NOT EXISTS `professional`
 (
-    `id_pro`          int(10) UNSIGNED                     NOT NULL AUTO_INCREMENT,
-    `firstname_pro`   varchar(50) COLLATE utf8_unicode_ci  NOT NULL,
-    `lastname_pro`    varchar(50) COLLATE utf8_unicode_ci  NOT NULL,
-    `email_pro`       varchar(250) COLLATE utf8_unicode_ci NOT NULL,
-    `street_name_pro` varchar(50) COLLATE utf8_unicode_ci  NULL,
-    `street_num_pro`  varchar(50) COLLATE utf8_unicode_ci  NULL,
-    `postal_code_pro` varchar(50) COLLATE utf8_unicode_ci  NOT NULL,
-    `tel_pro`         int(10) UNSIGNED ZEROFILL            NOT NULL,
-    `siren_pro`       bigint(20)                           NOT NULL,
-    `id_img`          int(10) UNSIGNED                     NOT NULL,
-    `status`          boolean                              NOT NULL,
+    `id_pro`        int(10) UNSIGNED                     NOT NULL AUTO_INCREMENT,
+    `firstname_pro` varchar(50) COLLATE utf8_unicode_ci  NOT NULL,
+    `lastname_pro`  varchar(50) COLLATE utf8_unicode_ci  NOT NULL,
+    `email_pro`     varchar(250) COLLATE utf8_unicode_ci NOT NULL,
+    `id_address`    int(10) UNSIGNED                     NOT NULL,
+    `tel_pro`       int(10) UNSIGNED ZEROFILL            NOT NULL,
+    `siren_pro`     bigint(20)                           NOT NULL,
+    `id_img`        int(10) UNSIGNED                     NOT NULL,
+    `status`        boolean                              NOT NULL,
+    `id_g`          int(10) UNSIGNED                     NOT NULL,
     PRIMARY KEY (`id_pro`),
-    UNIQUE KEY `siren_pro` (`siren_pro`)
+    UNIQUE KEY `siren_pro` (`siren_pro`),
+    KEY `Garage_address_FK` (`id_address`),
+    KEY `Garage_FK` (`id_g`)
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8
   COLLATE = utf8_unicode_ci;
@@ -208,28 +203,31 @@ ALTER TABLE `advertisement`
     ADD CONSTRAINT `advert_fuel_2` FOREIGN KEY (`id_fuel`) REFERENCES `fueltype` (`id_fuel`) ON DELETE NO ACTION ON
         UPDATE NO ACTION,
     ADD CONSTRAINT `advert_brand_3` FOREIGN KEY (`id_brand`) REFERENCES `brand` (`id_b`) ON DELETE NO ACTION ON UPDATE NO
-        ACTION,
-    ADD CONSTRAINT `advert_model_4` FOREIGN KEY (`id_model`) REFERENCES `model` (`id_model`) ON DELETE NO ACTION ON
-        UPDATE NO ACTION;
+        ACTION;
 
 --
 -- Contraintes pour la table `garage`
 --
 ALTER TABLE `garage`
-    ADD CONSTRAINT `Garage_CITY0_FK` FOREIGN KEY (`id_city`) REFERENCES `city` (`id_city`),
-    ADD CONSTRAINT `Garage_Pro_FK` FOREIGN KEY (`id_pro`) REFERENCES `professional` (`id_pro`);
+    ADD CONSTRAINT `Garage_address0_FK` FOREIGN KEY (`id_address`) REFERENCES `address` (`id_address`);
 
 --
--- Contraintes pour la table `model`
+-- Contraintes pour la table `professional`
 --
-ALTER TABLE `model`
-    ADD CONSTRAINT `Model_Brand_FK` FOREIGN KEY (`id_b`) REFERENCES `brand` (`id_b`);
+ALTER TABLE `professional`
+    ADD CONSTRAINT `Garage_FK` FOREIGN KEY (`id_g`) REFERENCES `garage` (`id_g`),
+    ADD CONSTRAINT `Garage_address_FK` FOREIGN KEY (`id_address`) REFERENCES `address` (`id_address`);
+
+--
+-- Contraintes pour la table `brand`
+--
+ALTER TABLE `brand`
+    ADD CONSTRAINT `Model_FK` FOREIGN KEY (`id_model`) REFERENCES `model` (`id_model`);
 
 --
 -- Contraintes pour la table `images`
 --
 ALTER TABLE `images`
-    ADD CONSTRAINT `Image_AD_FK` FOREIGN KEY (`ref_ad`) REFERENCES `advertisement` (`ref`),
     ADD CONSTRAINT `Image_PRO_FK` FOREIGN KEY (`id_pro`) REFERENCES `professional` (`id_pro`),
     ADD CONSTRAINT `Image_MOD_FK` FOREIGN KEY (`id_model`) REFERENCES `model` (`id_model`);
 COMMIT;
